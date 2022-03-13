@@ -2,7 +2,7 @@
 scriptdir="${PWD}/script/"
 cachedir="${PWD}/script/cache/"
 screenopt="screen.option"
-runningopt="running.option"
+runningopt="${cachedir}running.option"
 serverjaropt="serverjar.option"
 customrunscriptopt="customrunscript.option"
 jvmargsopt="jvmargs.option"
@@ -18,8 +18,8 @@ setup() {
 		echo "minecraft-server" >${scriptdir}$screenopt
 		echo "Created ${screenopt} file in directory ${scriptdir}."
 	fi
-	if ! [ -f ${scriptdir}${runningopt} ]; then
-		echo "false" >${scriptdir}${runningopt}
+	if ! [ -f ${runningopt} ]; then
+		echo "false" >${runningopt}
 	fi
 	if ! [ -f ${scriptdir}${serverjaropt} ]; then
 		echo "server.jar" >${scriptdir}${serverjaropt}
@@ -35,7 +35,7 @@ setup() {
 	fi
 }
 update() {
-	read running <${scriptdir}${runningopt}
+	read running <${runningopt}
 	read screen <${scriptdir}${screenopt}
 	read serverjar <${scriptdir}${serverjaropt}
 	read customrunscript <${scriptdir}${customrunscriptopt}
@@ -44,7 +44,7 @@ update() {
 		echo $?
 	)
 	if [ "$alreadyexists" == "1" ]; then
-		echo "false" >${scriptdir}${runningopt}
+		echo "false" >${runningopt}
 	fi
 	read jvmargs <${scriptdir}${jvmargsopt}
 }
@@ -55,7 +55,7 @@ stop() {
 		echo "The server isn't running!"
 	else
 		echo "Attempting to stop server..."
-		echo "false" >${scriptdir}${runningopt}
+		echo "false" >${runningopt}
 		if [ "$alreadyexists" == "0" ]; then
 			screen -S $screen -X stuff '\n'
 			screen -S $screen -X stuff 'stop'
@@ -78,7 +78,7 @@ start() {
 		fi
 	else
 		echo "Starting minecraft server..."
-		echo "true" >${scriptdir}${runningopt}
+		echo "true" >${runningopt}
 		if ! [ "$customrunscript" == "" ]; then
 			echo "Using custom run script."
 			echo "#!/bin/bash
@@ -86,18 +86,18 @@ start() {
                 	while [ \"\$running\" == \"true\" ]; do
                 	bash ${scriptdir}${customrunscript}
                 	sleep 5
-                	read running < ${scriptdir}${runningopt}
+                	read running < ${runningopt}
                 	done
-					echo \"false\" > ${scriptdir}${runningopt}" >${cachedir}cache-script.sh
+					echo \"false\" > ${runningopt}" >${cachedir}cache-script.sh
 		else
 			echo "#!/bin/bash
                 	running=\"true\"
                 	while [ \"\$running\" == \"true\" ]; do
                 	java ${jvmargs} -jar ${serverjar}
                 	sleep 5
-                	read running < ${scriptdir}${runningopt}
+                	read running < ${runningopt}
                 	done
-					echo \"false\" > ${scriptdir}${runningopt}" >${cachedir}cache-script.sh
+					echo \"false\" > ${runningopt}" >${cachedir}cache-script.sh
 		fi
 		screen -dmS $screen bash ${cachedir}cache-script.sh
 		echo "Server has been started in screen $screen."
