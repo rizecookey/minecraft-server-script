@@ -75,6 +75,7 @@ start() {
 		else
 			echo "There's already a screen named $screen!"
 			echo "Please change the screen name in the $screenopt file ."
+		fi
 	else
 		echo "Starting minecraft server..."
 		echo "true" >${scriptdir}${runningopt}
