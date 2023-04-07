@@ -6,6 +6,7 @@ runningopt="${cachedir}running.option"
 serverjaropt="serverjar.option"
 customrunscriptopt="customrunscript.option"
 jvmargsopt="jvmargs.option"
+stopcmdopt="stopcmd.option"
 setup() {
 	if ! [ -d ${scriptdir} ]; then
 		mkdir $scriptdir
@@ -33,12 +34,17 @@ setup() {
 		echo "-Xms2G -Xmx2G" >${scriptdir}${jvmargsopt}
 		echo "Created ${jvmargsopt} file in directory ${scriptdir}."
 	fi
+	if ! [ -f ${scriptdir}${stopcmdopt} ]; then
+		echo "stop" >${scriptdir}${stopcmdopt}
+		echo "Created ${stopcmdopt} file in directory ${scriptdir}."
+	fi
 }
 update() {
 	read running <${runningopt}
 	read screen <${scriptdir}${screenopt}
 	read serverjar <${scriptdir}${serverjaropt}
 	read customrunscript <${scriptdir}${customrunscriptopt}
+	read stopcmd <${scriptdir}${stopcmdopt}
 	alreadyexists=$(
 		screen -S $screen -X select .
 		echo $?
@@ -58,7 +64,7 @@ stop() {
 		echo "false" >${runningopt}
 		if [ "$alreadyexists" == "0" ]; then
 			screen -S $screen -X stuff '\n'
-			screen -S $screen -X stuff 'stop'
+			screen -S $screen -X stuff "$stopcmd"
 			screen -S $screen -X stuff '\n'
 		fi
 		echo "Server is stopping. Waiting for screen to close..."
@@ -104,7 +110,7 @@ start() {
 	fi
 }
 help() {
-	echo "Minecraft Server handling script version 1.0 by RizeCookey"
+	echo "Minecraft Server handling script version 1.1 by RizeCookey"
 	echo "----------------------------------------------------------------------------"
 	echo "-=OPTIONS=-"
 	echo "start : Starts the server"
@@ -118,6 +124,7 @@ help() {
 	echo "customrunscript.option : Defines a custom script to be run in screen, leave  "
 	echo "blank to use the default script"
 	echo "jvmargs.option : Defines arguments for the Java Virtual Machine"
+	echo "stopcmd.option : Defines the command to execute in the terminal to stop the server"
 	echo "-----------------------------------------------------------------------------"
 }
 
